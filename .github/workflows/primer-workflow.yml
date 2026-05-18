@@ -1,0 +1,15 @@
+name: Primer Workflow
+
+on:
+  push:
+
+jobs:
+  basic-job:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Imprimir mensaje
+        run: echo "El primer workflow se ejecutó correctamente"
+
+      - name: Listar contenido del repositorio
+        run: ls -la
