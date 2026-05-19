@@ -26,13 +26,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Node version (IMPORTANTE: fijo, no floating)
+      # Node version
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: ${{ inputs.node-version }}
 
-      # CACHE (optimizado y sin colisiones)
+      # CACHE 
       - name: Cache npm
         uses: actions/cache@v4
         with:
