@@ -1,0 +1,10 @@
+{
+  "name": "node-reusable-pipeline",
+  "version": "1.0.0",
+  "description": "Proyecto para GitHub Actions reusable workflows",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "node tests/app.test.js",
+    "build": "mkdir -p dist && cp src/index.js dist/"
+  }
+}
