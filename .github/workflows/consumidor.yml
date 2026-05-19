@@ -8,7 +8,7 @@ jobs:
   call-reusable:
     uses: ./.github/workflows/reusable.yml
     with:
-      node-version: "20"
+      node-version: "18"
       run-build: true
 
   extra-job:
