@@ -2,11 +2,11 @@ name: reusable
 
 on:
   workflow_call:
-
     inputs:
-      node-version:
-        required: true
+      working-directory:
+        required: false
         type: string
+        default: .
 
       artifact-name:
         required: true
@@ -42,8 +42,8 @@ jobs:
           path: ~/.npm
           key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
 
-      - name: Install dependencies
-        run: npm install
+      - run: npm install
+        working-directory: ${{ inputs.working-directory }}
 
       - name: Run tests
         id: test-step
