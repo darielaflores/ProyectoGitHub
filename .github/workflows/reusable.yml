@@ -1,0 +1,72 @@
+name: reusable
+
+on:
+  workflow_call:
+
+    inputs:
+      node-version:
+        required: true
+        type: string
+
+      artifact-name:
+        required: true
+        type: string
+
+    outputs:
+      test-status:
+        description: "Resultado de tests"
+        value: ${{ jobs.build-test.outputs.test-status }}
+
+jobs:
+
+  build-test:
+
+    runs-on: ubuntu-latest
+
+    outputs:
+      test-status: ${{ steps.test-step.outcome }}
+
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+
+      - name: Cache node_modules
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        id: test-step
+        run: npm test
+
+      - name: Build project
+        run: npm run build
+
+      - name: Save test report
+        run: |
+          mkdir reports
+          echo "Tests ejecutados correctamente" > reports/test-report.txt
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.artifact-name }}-build
+          path: dist/
+          retention-days: 7
+
+      - name: Upload reports artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.artifact-name }}-reports
+          path: reports/
+          retention-days: 15
