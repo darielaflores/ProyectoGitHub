@@ -1,72 +1,75 @@
-name: reusable
+name: Reusable
 
 on:
   workflow_call:
     inputs:
-      working-directory:
-        required: false
-        type: string
-        default: .
-
-      artifact-name:
+      node-version:
         required: true
         type: string
-
+      run-build:
+        required: false
+        type: boolean
+        default: true
     outputs:
       test-status:
-        description: "Resultado de tests"
-        value: ${{ jobs.build-test.outputs.test-status }}
+        value: ${{ jobs.pipeline.outputs.test-status }}
 
 jobs:
-
-  build-test:
-
+  pipeline:
     runs-on: ubuntu-latest
 
     outputs:
-      test-status: ${{ steps.test-step.outcome }}
+      test-status: ${{ steps.test.outputs.status }}
 
     steps:
-
+      # Descargar repo
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Node version (IMPORTANTE: fijo, no floating)
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: ${{ inputs.node-version }}
 
-      - name: Cache node_modules
+      # CACHE (optimizado y sin colisiones)
+      - name: Cache npm
         uses: actions/cache@v4
         with:
           path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+          key: ${{ runner.os }}-node-${{ inputs.node-version }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-${{ inputs.node-version }}-
 
-      - run: npm install
-        working-directory: ${{ inputs.working-directory }}
+      # Instalar dependencias
+      - name: Install dependencies
+        run: npm install
 
+      # Tests
       - name: Run tests
-        id: test-step
-        run: npm test
+        id: test
+        run: |
+          npm test
+          echo "status=success" >> $GITHUB_OUTPUT
 
+      # Build
       - name: Build project
+        if: inputs.run-build == true
         run: npm run build
 
-      - name: Save test report
-        run: |
-          mkdir reports
-          echo "Tests ejecutados correctamente" > reports/test-report.txt
-
+      # ARTIFACT BUILD
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ inputs.artifact-name }}-build
+          name: build-${{ github.sha }}
           path: dist/
           retention-days: 7
 
-      - name: Upload reports artifact
+      # ARTIFACT TEST LOGS
+      - name: Upload test logs
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ inputs.artifact-name }}-reports
-          path: reports/
-          retention-days: 15
+          name: test-logs-${{ github.sha }}
+          path: |
+            npm-debug.log
+          retention-days: 5
