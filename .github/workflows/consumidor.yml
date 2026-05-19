@@ -1,42 +1,24 @@
-name: consumidor
+name: Consumidor
 
 on:
   push:
-    branches:
-      - main
+    branches: ["main"]
 
 jobs:
-
-  reusable-job:
-
+  call-reusable:
     uses: ./.github/workflows/reusable.yml
-
     with:
-      node-version: '18'
-      artifact-name: 'node18'
+      node-version: "20"
+      run-build: true
 
-  reusable-job-node20:
-
-    uses: ./.github/workflows/reusable.yml
-
-    with:
-      node-version: '20'
-      artifact-name: 'node20'
-
-  custom-job:
-
+  extra-job:
+    needs: call-reusable
     runs-on: ubuntu-latest
 
-    needs:
-      - reusable-job
-      - reusable-job-node20
-
     steps:
+      - name: Mostrar output del reusable workflow
+        run: echo "Test status = ${{ needs.call-reusable.outputs.test-status }}"
+        
 
-      - name: Mostrar outputs
-        run: |
-          echo "Resultado Node18: ${{ needs.reusable-job.outputs.test-status }}"
-          echo "Resultado Node20: ${{ needs.reusable-job-node20.outputs.test-status }}"
-
-      - name: Lógica adicional
+      - name: Lógica extra
         run: echo "Pipeline consumidor ejecutando tareas propias"
