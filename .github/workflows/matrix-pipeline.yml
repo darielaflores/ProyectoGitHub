@@ -1,0 +1,96 @@
+name: Matrix Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+# CONCURRENCY
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-matrix:
+
+    strategy:
+
+      # no cancelar todos si uno falla
+      fail-fast: false
+
+      matrix:
+
+        os:
+          - ubuntu-latest
+          - windows-latest
+
+        node-version:
+          - 18
+          - 20
+
+        mode:
+          - debug
+          - release
+
+        # EXCLUDE
+        exclude:
+          - os: windows-latest
+            mode: debug
+
+        # INCLUDE
+        include:
+          - os: ubuntu-latest
+            node-version: 20
+            mode: release
+            environment: production
+            special-feature: enabled
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+
+      # Checkout
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Setup Node
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      # Install
+      - name: Install dependencies
+        run: npm install
+
+      # Tests
+      - name: Run tests
+        run: npm test
+
+      # Build
+      - name: Build project
+        run: npm run build
+
+      # Mostrar información matrix
+      - name: Show matrix info
+        run: |
+          echo "OS: ${{ matrix.os }}"
+          echo "Node: ${{ matrix.node-version }}"
+          echo "Mode: ${{ matrix.mode }}"
+
+      # JOB SUMMARY
+      - name: Generate job summary
+        run: |
+          echo "# ✅ Pipeline Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Matrix Configuration" >> $GITHUB_STEP_SUMMARY
+          echo "- OS: ${{ matrix.os }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Node Version: ${{ matrix.node-version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Mode: ${{ matrix.mode }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Result" >> $GITHUB_STEP_SUMMARY
+          echo "- Status: SUCCESS" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Additional Info" >> $GITHUB_STEP_SUMMARY
+          echo "- Workflow: ${{ github.workflow }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Branch: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
