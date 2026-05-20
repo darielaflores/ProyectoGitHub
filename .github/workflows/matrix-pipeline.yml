@@ -81,7 +81,7 @@ jobs:
       # JOB SUMMARY
       - name: Generate job summary
         run: |
-          echo "# ✅ Pipeline Summary" >> $GITHUB_STEP_SUMMARY
+          echo "# Pipeline Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "## Matrix Configuration" >> $GITHUB_STEP_SUMMARY
           echo "- OS: ${{ matrix.os }}" >> $GITHUB_STEP_SUMMARY
