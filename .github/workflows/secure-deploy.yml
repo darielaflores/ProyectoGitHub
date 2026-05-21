@@ -1,0 +1,94 @@
+name: Secure Deploy Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+# PERMISOS MÍNIMOS GLOBALES
+permissions:
+  contents: read
+
+jobs:
+
+  # TESTS
+  test:
+
+    runs-on: ubuntu-latest
+
+    # permisos mínimos job
+    permissions:
+      contents: read
+
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests
+        run: npm test
+
+  # DEPLOY STAGING
+  deploy-staging:
+
+    needs: test
+
+    runs-on: ubuntu-latest
+
+    environment:
+      name: staging
+
+    # permisos mínimos específicos
+    permissions:
+      contents: read
+
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Simulate staging deploy
+        run: |
+          echo "Deploying to staging..."
+          echo "Environment: ${{ vars.APP_ENV }}"
+
+  # DEPLOY PRODUCTION
+  deploy-production:
+
+    needs: test
+
+    # SOLO MAIN
+    if: github.ref == 'refs/heads/main'
+
+    runs-on: ubuntu-latest
+
+    environment:
+      name: production
+
+    permissions:
+      contents: read
+
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Production deploy
+        env:
+          DEPLOY_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
+          API_KEY: ${{ secrets.API_KEY }}
+
+        run: |
+          echo "Deploying to production..."
+          echo "Production deployment approved"
+
+          # NUNCA imprimir secretos
+          # echo $DEPLOY_TOKEN
