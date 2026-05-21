@@ -1,10 +1,10 @@
-const { sum } = require("../src/index");
+const { secureApp } = require("../src/index");
 
 console.log("Ejecutando tests...");
 
-if (sum(2, 3) !== 5) {
+if (secureApp() !== "Aplicación segura funcionando") {
   console.error("❌ Test fallido");
   process.exit(1);
 }
 
-console.log("✅ Tests correctos");
+console.log("Tests correctos");
