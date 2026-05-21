@@ -1,8 +1,8 @@
 {
-  "name": "matrix-pipeline",
+  "name": "secure-deploy",
   "version": "1.0.0",
   "scripts": {
     "test": "node tests/app.test.js",
-    "build": "mkdir dist && copy src\\index.js dist\\index.js || cp src/index.js dist/index.js"
+    "build": "mkdir -p dist && cp src/index.js dist/"
   }
 }
