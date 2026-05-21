@@ -1,8 +1,7 @@
-function sum(a, b) {
-  return a + b;
+function secureApp() {
+  return "Aplicación segura funcionando";
 }
 
-console.log("App ejecutándose...");
-console.log("2 + 3 =", sum(2, 3));
+console.log(secureApp());
 
-module.exports = { sum };
+module.exports = { secureApp };
